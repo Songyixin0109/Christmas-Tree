@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>羊羊 Marry Christmas!</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, sans-serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    /* GUI 样式 */
+    .lil-gui {
+      --width: 300px;
+      --font-size: 14px;
+    }
+
+    .lil-gui.autoPlace {
+      right: 10px;
+      top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+
+  <script type="importmap">
+    {
+        "imports": {
+            "three": "./three.js-master/build/three.module.js",
+            "three/addons/": "./three.js-master/examples/jsm/",
+            "./three/": "./three/"
+        }
+    }
+    </script>
+
+  <!-- 引入 lil-gui -->
+  <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18.1/dist/lil-gui.umd.min.js"></script>
+
+  <script type="module">
+    import { Scene } from './three/scene.js';
+    import { Renderer } from './three/renderer.js';
+    import { ChristmasTree } from './three/christmasTree.js';
+    import { ShaderLoader } from './three/shaderLoader.js';
+    import { Controls } from './three/controls.js';
+
+    const container = document.getElementById('container');
+
+    const params = {
+      粒子数量: 5000,
+      粒子大小: 0.05,
+      闪耀大小: 0.7,
+      树高: 5,
+      树宽: 1.8,
+      旋转速度: 0.002,
+      透明度: 0.8,
+      星星大小: 0.2,
+      星星颜色: '#ffff00',
+      后期处理: {
+        发光强度: 0.5,
+        发光半径: 0.4,
+        发光阈值: 0,
+        曝光度: 1.0
+      }
+    };
+
+    // 初始化场景和渲染器
+    const sceneManager = new Scene(container);
+    const renderer = new Renderer(container);
+
+    let christmasTree;
+
+    // 加载着色器并启动应用
+    ShaderLoader.loadAllShaders().then(shaders => {
+      renderer.setupPostProcessing(sceneManager.scene, sceneManager.camera, params);
+
+      christmasTree = new ChristmasTree(sceneManager.scene, params, shaders);
+
+      // 创建控制器
+      const controls = new Controls(params, renderer, sceneManager, {
+        onTreeUpdate: () => {
+          if (christmasTree) {
+            christmasTree.createTree();
+          }
+        },
+        onStarUpdate: () => {
+          if (christmasTree) {
+            christmasTree.loadStar();
+          }
+        },
+        onParticleSize: (value) => {
+          if (christmasTree && christmasTree.points && christmasTree.points.material.uniforms) {
+            christmasTree.points.material.uniforms.size.value = value;
+          }
+        },
+        onOpacityChange: (value) => {
+          if (christmasTree && christmasTree.points && christmasTree.points.material.uniforms) {
+            christmasTree.points.material.uniforms.opacity.value = value;
+          }
+        }
+      });
+
+      const animate = () => {
+        requestAnimationFrame(animate);
+        if (christmasTree) {
+          christmasTree.update();
+        }
+        sceneManager.update();
+        renderer.render(sceneManager.scene, sceneManager.camera);
+      };
+
+      animate();
+
+      window.addEventListener('resize', () => {
+        sceneManager.handleResize();
+        renderer.handleResize();
+      });
+    });
+  </script>
+</body>
+
+</html>
