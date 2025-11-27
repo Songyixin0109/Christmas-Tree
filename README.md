@@ -24,6 +24,7 @@ Christmas Tree/
 ### 方式二：开发模式
 - 使用 **Live Server** (VSCode插件) 或本地服务器打开 `index.html`
 - 需要服务器环境，因为涉及本地文件加载
+- **注意：需要从 [Three.js 官网](https://threejs.org/) 下载 Three.js 库，并将文件放置在 `three.js-master/` 目录下**
 - 适合开发者进行修改和调试
 
 ## ✨ 特色功能
